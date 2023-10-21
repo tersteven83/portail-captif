@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to our portal</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap">
+    <style>
+        body {
+            font-family: Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        form {
+            width: 300px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        input {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #3069d9;
+        }
+
+        .google-auth {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .google-auth-icon {
+            width: 25px;
+            height: 25px;
+            margin-right: 10px;
+            float: left;
+        }
+
+        .google-auth-text {
+            float: left;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <form method="post" action="#">
+        <h1>Welcome to our portal</h1>
+        <p>Enter your username and password and click Login to access the Internet (action="$PORTAL_ACTION$")</p>
+        <input name="auth_user" type="text" placeholder="Username">
+        <input name="auth_pass" type="password" placeholder="Password">
+        <input name="redirurl" type="hidden" value="$PORTAL_REDIRURL$">
+        <input name="zone" type="hidden" value="$PORTAL_ZONE$">
+        <div class="google-auth">
+            <img class="google-auth-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Google_Authenticator_icon.svg/1200px-Google_Authenticator_icon.svg.png" alt="Google Authenticator">
+            <div class="google-auth-text">
+                Sign in with Google Authenticator
+            </div>
+        </div>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>

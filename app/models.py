@@ -1,8 +1,9 @@
 from typing import Optional
 
-from sqlalchemy import Integer, VARCHAR, ForeignKey, Column
+from sqlalchemy import Integer, VARCHAR, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from . import db
+from datetime import datetime
 
 class Radcheck(db.Model):
     __tablename__ = "radcheck"
@@ -23,11 +24,5 @@ class Voucher(db.Model):
     voucher_code: Mapped[str] = mapped_column(ForeignKey('radcheck.username', ondelete="CASCADE", onupdate="CASCADE"))
     is_active: Mapped[bool] = mapped_column(default=0)
     telephone_number: Mapped[Optional[str]] = mapped_column(VARCHAR(255))
+    date: Mapped[datetime] = mapped_column(DateTime)
 
-
-
-# id = Column(Integer, primary_key=True)
-#     username = Column(VARCHAR(255), unique=True)
-#     attribute = Column(VARCHAR(255))
-#     op = Column(VARCHAR(255))
-#     value = Column(VARCHAR)
