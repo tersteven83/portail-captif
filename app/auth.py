@@ -1,20 +1,11 @@
-from flask import (Blueprint, flash, redirect,
+import requests
+from flask import (Blueprint, flash, redirect, g,
                    url_for, render_template, request)
 from .models import *
-from . import sendSMS
+from . import sendSMS, db
+from sqlalchemy import text
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
-
-
-@bp.route('/login', methods=('GET', 'POST'))
-def login():
-    if request.method == "POST":
-        username = request.form.get('auth_user')
-        pwd = request.form.get('auth_pass')
-        print(username + " " + pwd)
-    # user1 = Radcheck.query.where(Radcheck.id > 1).first()
-    return render_template("login.html")
-
 
 @bp.route('/number', methods=('GET', 'POST'))
 def number():
@@ -26,7 +17,7 @@ def number():
             Voucher.telephone_number == None
         )
     # compter le nombre de voucher code dispo, si c'est inférieur ou égal à 100, on alerte l'admin
-    num_admin = "+261344861844"
+    num_admin = "+261333476904"
     nb_voucher = voucher_dispo.count()
     if nb_voucher in range(0, 100, 10):
         sendSMS(f"Bonjour admin, vous devriez ajouter de nouvels code voucher, il n'y en reste plus que {nb_voucher}",
@@ -39,25 +30,32 @@ def number():
         if is_valid_phone_number(telephone_number):
             # fetch the first non active voucher code
             voucher_code = voucher_dispo.first()
-            if sendSMS(voucher_code.voucher_code, telephone_number):
-              print("OK!!")
-              # Message envoyé avec succès
-              success = "Le code est envoyé avec succès, vérifiez votre téléphone"
-              flash(success)
-              
-              # mettre à jour le voucher envoyé, marqué comme actif
-              voucher_code.update({
-                voucher_code.is_active: True,
-                voucher_code.date: datetime.now(),
-                voucher_code.telephone_number: telephone_number
-              })
-              
-            else:
-                print("Le forfait est épuisé")
+            if voucher_code is not None:
+                if sendSMS(voucher_code.voucher_code, telephone_number):
+                    print("OK!!")
+                    # Message envoyé avec succès
+                    success = "Le code est envoyé avec succès, vérifiez votre téléphone"
+                    flash(success)
+                    
+                    # mettre à jour le voucher envoyé, marqué comme actif
+                    Voucher.query.filter(Voucher.id == voucher_code.id).update({
+                        Voucher.is_active: True,
+                        Voucher.date: datetime.now(),
+                        Voucher.telephone_number: telephone_number
+                    })
+                    db.session.commit()
+                    return redirect("http://192.168.11.1:8002/index.php?zone=serveur")
+                else:
+                    print("Le forfait est épuisé")
         else:
             print("Misy tsy mety")
 
     return render_template('auth/number.html')
+
+@bp.route('/hello')
+def hello():
+    return 'Hello, World!'
+
 
 
 def is_valid_phone_number(phone_number):

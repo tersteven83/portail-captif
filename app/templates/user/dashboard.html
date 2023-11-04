@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title %}Dashboard{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="postion-relative">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td><span>Identifiant</span ><br>{{ userinfo.username }}</td>
+                    </tr>
+                    <tr>
+                        <td><span>Profil</span><br>"profil"</td>
+                    </tr>
+                    <tr>
+                        <td><span>Service</span><br>"service"</td>
+                    </tr>
+                    <tr>
+                        <td><span>Zone d'entrée</span><br>"zone"</td>
+                    </tr>
+                    <tr>
+                        <td><span>Plage d'entrée</span><br>"plage"</td>
+                    </tr>
+                    <tr>
+                        <td><span>Validité</span><br>"validité"</td>
+                    </tr>
+                    <tr>
+                        <td><span>Crédit temps</span><br>"credit"</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </div>    
+{% endblock %}

@@ -13,7 +13,8 @@ db = SQLAlchemy(model_class=Base)
 def create_app():
     app = Flask(__name__)
     app.config.from_mapping(
-        SQLALCHEMY_DATABASE_URI='mysql+pymysql://user:user@localhost/portail-captif',
+        # SQLALCHEMY_DATABASE_URI='mysql+pymysql://user:user@localhost/portail-captif',
+        SQLALCHEMY_DATABASE_URI='mysql+pymysql://raduser:radpass@192.168.11.250/raddb',
         SQLALCHEMY_ECHO=True,
         SECRET_KEY='dev'
     )
@@ -25,7 +26,10 @@ def create_app():
 
     from . import auth
     app.register_blueprint(auth.bp)
-
+    
+    from . import user
+    app.register_blueprint(user.bp)
+    
     return app
 
 def sendSMS(text, phone_number, config_file=None):
