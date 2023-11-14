@@ -6,6 +6,7 @@ from . import db
 from datetime import datetime
 from sqlalchemy_utils import generic_repr
 
+@generic_repr
 class Radcheck(db.Model):
     __tablename__ = "radcheck"
 
@@ -87,5 +88,6 @@ class Userinfo(db.Model):
     creationby: Mapped[str] = mapped_column(VARCHAR(128))
     updatedate: Mapped[datetime] = mapped_column(DateTime, insert_default=datetime(1, 1, 1, 0, 0, 0))
     updateby: Mapped[str] = mapped_column(VARCHAR(128))
+    tmp_passcode: Mapped[str] = mapped_column(VARCHAR(6))
     
     

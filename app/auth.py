@@ -1,6 +1,8 @@
 import requests
+import jwt
 from flask import (Blueprint, flash, redirect, g,
-                   url_for, render_template, request)
+                   url_for, render_template, request, jsonify,
+                   session)
 from .models import *
 from . import sendSMS, db
 from sqlalchemy import text
@@ -30,8 +32,26 @@ def number():
         if is_valid_phone_number(telephone_number):
             # fetch the first non active voucher code
             voucher_code = voucher_dispo.first()
+            print(voucher_code)
             if voucher_code is not None:
-                if sendSMS(voucher_code.voucher_code, telephone_number):
+                # vérifier si le voucher_code a un attribut "*-Password"
+                voucher_attr_check = Radcheck.query.filter(Radcheck.username == voucher_code.voucher_code)
+                passwd = None
+                for row in voucher_attr_check:
+                    if "-Password" in row.attribute:
+                        passwd = row.value
+                        break
+                
+                if passwd:
+                    msg = f"Voici votre code d'identification \
+                        username: {voucher_code.voucher_code} \
+                        password: {passwd}"
+                else:
+                    msg = f"Voici votre code d'identification \
+                        username: {voucher_code.voucher_code} \
+                        password: -"
+                
+                if sendSMS(msg, telephone_number):
                     print("OK!!")
                     # Message envoyé avec succès
                     success = "Le code est envoyé avec succès, vérifiez votre téléphone"
@@ -39,23 +59,17 @@ def number():
                     
                     # mettre à jour le voucher envoyé, marqué comme actif
                     Voucher.query.filter(Voucher.id == voucher_code.id).update({
-                        Voucher.is_active: True,
                         Voucher.date: datetime.now(),
                         Voucher.telephone_number: telephone_number
                     })
                     db.session.commit()
-                    return redirect("http://192.168.11.1:8002/index.php?zone=serveur")
+                    return redirect("http://192.168.10.1:8002/index.php?zone=ambohijatovo")
                 else:
                     print("Le forfait est épuisé")
         else:
             print("Misy tsy mety")
 
     return render_template('auth/number.html')
-
-@bp.route('/hello')
-def hello():
-    return 'Hello, World!'
-
 
 
 def is_valid_phone_number(phone_number):
@@ -78,3 +92,34 @@ def is_valid_phone_number(phone_number):
             return False
 
     return True
+
+
+@bp.route('/hello', methods=['GET'])
+def hello():
+    verification, decoded_message = verifier_token()
+    if verification:
+        session['user_id'] = decoded_message['user_id']
+        print(decoded_message)
+        return jsonify({'message': 'Accès autorisé'})
+    else:
+        return jsonify({'message': 'Accès non autorisé'}), 401
+
+def verifier_token():
+    token = request.headers.get('Authorization')
+    if not token:
+        return False, {"error": "Token manquant"}
+    
+    try:
+        # Extrait le token du format 'Bearer <token>'
+        token = token.split()[1]
+        decoded_token = jwt.decode(token, 'steven', algorithms=['HS256'])
+        return True, decoded_token
+    except jwt.ExpiredSignatureError:
+        return False, {"error": "Erreur de signature"}
+    except jwt.InvalidTokenError:
+        return False, {"error": "Token invalide"}
+
+@bp.route('/test')
+def test():
+    print(session.get("user_id"))
+    return "hello"
