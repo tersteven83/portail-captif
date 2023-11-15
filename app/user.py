@@ -1,9 +1,10 @@
 from flask import (Blueprint, render_template, request, flash, redirect,
-                   url_for)
+                   url_for, g)
 from sqlalchemy import and_
 from .models import Radacct, Radcheck, Userinfo
-from . import sendSMS, db
-import re, hashlib, random
+from . import db, generate_passcode, hash_password
+from .auth import is_valid_phone_number
+import re
 
 
 bp = Blueprint("user", __name__, url_prefix='/user')
@@ -11,15 +12,10 @@ bp = Blueprint("user", __name__, url_prefix='/user')
 @bp.route('/edit/<acctsessionId>', methods=['POST', 'GET'])
 def edit(acctsessionId):
         # on vérifie si la session existe dans la base de donnée
-    sessionInfo = Radacct.query.\
-        filter(
-            Radacct.acctsessionid == acctsessionId,
-            Radacct.acctstoptime == None
-        )
-    
-    if sessionInfo.count() == 1:
+    session_is_active, sessionInfo = session_state(acctsessionId)
+    if session_is_active:
         # la session existe
-        username = sessionInfo.one().username
+        username = sessionInfo.username
         if request.method == 'POST':
             error = None
             success = None
@@ -97,18 +93,13 @@ def edit(acctsessionId):
 
 @bp.route("/valid/<acctsessionId>", methods=["GET", "POST"])
 def valide_modification(acctsessionId):
-    # on vérifie si la session existe dans la base de donnée
-    sessionInfo = Radacct.query.\
-        filter(
-            Radacct.acctsessionid == acctsessionId,
-            Radacct.acctstoptime == None
-        )
-    if sessionInfo.count() == 1:
+    session_is_active, sessionInfo = session_state(acctsessionId)
+    if session_is_active:
         # la session existe
-        username = sessionInfo.one().username
+        username = sessionInfo.username
         
         # récupérer son work phone
-        user_info = Userinfo.query.filter(Userinfo.username == username).one()
+        user_info = Userinfo.query.filter(Userinfo.username == username).one_or_none()
         if request.method == "POST":
             pass_code = request.form.get("passCode")
             # vérifier si le passcode entré par l'utilisateur est le même que celle dans la BD
@@ -142,19 +133,113 @@ def valide_modification(acctsessionId):
                     print("le code n'est pas envoyé")
                 
             else:
-                return "l'utilisateur n'a pas encore de work phone"
+                return redirect(url_for('user.add_work_phone', acctsessionId=acctsessionId))
             
         return render_template('user/valid.html')
+      
+
+@bp.route('/add_wk/<ID>/<int:is_session>', methods=["POST", "GET"])
+def add_work_phone(ID, is_session):
+    if is_session == 1:
+        session_is_active, sessionInfo = session_state(ID)
+        if session_is_active:
+            username = sessionInfo.username
             
+            if request.method == "POST":
+                tel = request.form.get("tel")
+                if is_valid_phone_number(tel):
+                    user_info = Userinfo.query.filter(Userinfo.username == username).one_or_none()
+                    user_info.workphone = tel
+                    db.session.commit()
+                    flash("Votre numéro a été bien enregistré", category='message')
+                    return redirect(url_for('user.valide_modification', acctsessionId=ID))
+                else:
+                    flash("Veuillez vérifier votre saisi", category='error')
+            
+            return render_template('user/add_work_phone.html')
+    
+    else:
+        user_info = Userinfo.query.filter_by(id=ID).one_or_none()
+        if user_info and user_info.can_be_edited:
+            if request.method == "POST":
+                tel = request.form.get("tel")
+                if is_valid_phone_number(tel):
+                    user_info.workphone = tel
+                    flash("Votre numéro a été bien enregistré", category='message')
+                    
+                    # generé un passcode au nouveau numéro téléphone
+                    tmp_passcode = str(generate_passcode())
+                    user_info.tmp_passcode = tmp_passcode
+
+                    # Envoyer le passcode à l'utilisateur
+                    msg = f"Votre pass code de réinitialisation de mot de passe : {tmp_passcode}"
+                    # if sendSMS(msg, wk_phone):
+                    if 1:
+                        print(msg)
+                        # user_info.can_be_edited = False
+                        db.session.commit()
+                        return redirect(url_for('user.edit_pwd', user_id=ID))
+                    else:
+                        print("le code n'est pas envoyé")
+                else:
+                    flash("Veuillez vérifier votre saisi", category='error')
+            
+            return render_template('user/add_work_phone.html', user_info=user_info)
+        else:
+            return  user_info.__str__()
+    
+
+@bp.route('/edit_pwd/<int:user_id>', methods=['GET', 'POST'])
+def edit_pwd(user_id):
+    """
+        Modifier le mot de passe de l'utilisateur
+    """
+    user_info = Userinfo.query.filter_by(id=user_id).one_or_none()
+    
+    # vérifier si l'utilisateur est modifiable
+    if user_info and user_info.can_be_edited:
+        if request.method == "POST":
+            pass_code = request.form.get("passCode")
+            new_passd = request.form.get("newPassd")
+            cnf_passd = request.form.get("cnfPassd")
+            
+            # vérifier si le passcode entré par l'utilisateur est le même que celle dans la BD,
+            # les deux passwords sont égaux,
+            # les password sont conformes aux normes
+            if user_info.tmp_passcode == pass_code and new_passd == cnf_passd and \
+                bool(re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$", new_passd)):
+                
+                # hasher le nouveau password
+                hash_pwd = hash_password(new_passd)
+                Radcheck.query.filter(
+                    and_(
+                        Radcheck.username == user_info.username,
+                        Radcheck.attribute.like("%-Password")
+                    )
+                ).update({
+                    Radcheck.attribute: "SHA-Password",
+                    Radcheck.value: hash_pwd
+                })
+                
+                # make the userinfo ineditable
+                user_info.can_be_edited = False
+                db.session.commit()
+                return redirect("192.168.110.0:8002/index.php?zone=ambohijatovo")
+            else:
+                flash("Le code que vous avez entré est invalide. Veuillez vérifier votre saisi et/ou consulter votre \
+                    telephone", category='error')
+            
+        return render_template('user/edit_pwd.html', username=user_info.username)       
+    else:
+        return "request.headers('404')"
         
-def hash_password(password):
-    sha1 = hashlib.sha1()
-    sha1.update(password.encode('utf-8'))
-    return sha1.hexdigest()
-
-def verify_password(entered_passwd, stored_hashed_passwd):
-    entered_passwd_hash = hash_password(entered_passwd)
-    return entered_passwd_hash == stored_hashed_passwd
-
-def generate_passcode():
-    return random.randint(100000, 999999)
+def session_state(acctsessionId):
+    # on vérifie si la session existe dans la base de donnée
+    sessionInfo = Radacct.query.\
+        filter(
+            Radacct.acctsessionid == acctsessionId,
+            Radacct.acctstoptime == None
+        ).one_or_none()
+    if sessionInfo:
+        return True, sessionInfo
+    return False, None

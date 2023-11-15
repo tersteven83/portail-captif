@@ -1,0 +1,33 @@
+
+{% extends 'base.html' %}
+{% block title %} Edit Password {% endblock %}
+{% block content %}
+<h2>Hello {{ username }} - Edit your profile</h2>
+
+<form class="form" method="post">
+
+    <div class="inputBox">
+
+        <input type="text" name="passCode"> <i>Pass Code</i>
+
+    </div>
+    <div class="inputBox">
+
+        <input type="password" name="newPassd"> <i>New password</i>
+
+    </div>
+
+    <div class="inputBox">
+
+        <input type="password" name="cnfPassd"> <i>Confirm password</i>
+
+    </div>
+
+    <div class="inputBox">
+
+        <input type="submit" value="Envoyer">
+
+    </div>
+
+</form>
+{% endblock %}

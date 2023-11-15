@@ -1,11 +1,11 @@
-import requests
-import jwt
 from flask import (Blueprint, flash, redirect, g,
                    url_for, render_template, request, jsonify,
                    session)
+
 from .models import *
-from . import sendSMS, db
+from . import sendSMS, db, is_valid_phone_number, generate_passcode
 from sqlalchemy import text
+import re
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -71,55 +71,72 @@ def number():
 
     return render_template('auth/number.html')
 
+@bp.route('/gather_id', methods=['GET', 'POST'])
+def gather_id():
+    if request.method == "POST":
+        value = request.form.get("value")
+        if is_valid_phone_number(value):
+            # la valeur reçu du formulaire est un numéro de téléphone
+            # vérifier sa présence dans la BD
+            # si oui on retourne son ID
+            user_info = Userinfo.query.filter(Userinfo.workphone == value).one_or_none()
+            
+            if user_info:
+                # générer un passcode et enregistrer dans la table userinfo
+                tmp_passcode = str(generate_passcode())
+                user_info.tmp_passcode = tmp_passcode
 
-def is_valid_phone_number(phone_number):
-    """Returns True if the phone number is valid, False otherwise."""
+                # Envoyer le passcode à l'utilisateur
+                msg = f"Votre pass code de réinitialisation de mot de passe : {tmp_passcode}"
+                # if sendSMS(msg, value):
+                if 1:
+                    print('ok')
+                    
+                    # make the user_info editable
+                    user_info.can_be_edited = True
+                    db.session.commit()
+                    return redirect(url_for('user.edit_pwd', user_id=user_info.id))
+                else:
+                    print("le code n'est pas envoyé")
+            else:
+                flash("L'utilisatuer que vous cherchez n'existe pas", category='error')
+        
+        elif bool(re.match("^(?=.*[a-zA-Z])[a-zA-Z0-9_]+$", value)):
+            # de la forme username
+            username = value
+            
+            # vérifier si cet utilisateur a un work phone
+            # si oui on envoi le passcode
+            # sinon on demande son workphone
+            
+            user_info = Userinfo.query.filter(Userinfo.username == username).one_or_none()
+            if user_info:
+                
+                # make the user_info editable
+                user_info.can_be_edited = True
+                if user_info.workphone:
+                    wk_phone = user_info.workphone
+                    tmp_passcode = str(generate_passcode())
+                    user_info.tmp_passcode = tmp_passcode
 
-    # Vérifie que la chaîne de caractères commence par 00
+                    # Envoyer le passcode à l'utilisateur
+                    msg = f"Votre pass code de réinitialisation de mot de passe : {tmp_passcode}"
+                    # if sendSMS(msg, wk_phone):
+                    if 1:
+                        print(msg + " work-phone: " + user_info.workphone)
+                        db.session.commit()
+                        return redirect(url_for('user.edit_pwd', user_id=user_info.id))
+                    else:
+                        print("le code n'est pas envoyé")
+                else:
+                    # l'utilisateur n'a pas de numéro téléphone
+                    flash("Vous n'avez pas encore de numéro de téléphone de travail, veuillez me renseignez")
+                    return redirect(url_for('user.add_work_phone', ID=user_info.id, is_session=0))
+                
+            else:
+                flash("L'utilisatuer que vous cherchez n'existe pas", category='error')
+        else:
+            flash("Veuillez vérifier votre saisi", category='error')
+            
+    return render_template('auth/gather_id.html')
 
-    if not phone_number.startswith("00"):
-        return False
-
-    # Vérifie que la chaîne de caractères contient 13 chiffres
-
-    if len(phone_number) < 13:
-        return False
-
-    # Vérifie que la chaîne de caractères ne contient que des chiffres
-
-    for char in phone_number[2:]:
-        if not char.isdigit():
-            return False
-
-    return True
-
-
-@bp.route('/hello', methods=['GET'])
-def hello():
-    verification, decoded_message = verifier_token()
-    if verification:
-        session['user_id'] = decoded_message['user_id']
-        print(decoded_message)
-        return jsonify({'message': 'Accès autorisé'})
-    else:
-        return jsonify({'message': 'Accès non autorisé'}), 401
-
-def verifier_token():
-    token = request.headers.get('Authorization')
-    if not token:
-        return False, {"error": "Token manquant"}
-    
-    try:
-        # Extrait le token du format 'Bearer <token>'
-        token = token.split()[1]
-        decoded_token = jwt.decode(token, 'steven', algorithms=['HS256'])
-        return True, decoded_token
-    except jwt.ExpiredSignatureError:
-        return False, {"error": "Erreur de signature"}
-    except jwt.InvalidTokenError:
-        return False, {"error": "Token invalide"}
-
-@bp.route('/test')
-def test():
-    print(session.get("user_id"))
-    return "hello"

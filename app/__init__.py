@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 import gammu
+import hashlib, random
 
 
 class Base(DeclarativeBase):
@@ -15,7 +16,7 @@ def create_app():
     app.config.from_mapping(
         # SQLALCHEMY_DATABASE_URI='mysql+pymysql://user:user@localhost/portail-captif',
         SQLALCHEMY_DATABASE_URI='mysql+pymysql://raduser:radpass@192.168.11.250/raddb',
-        SQLALCHEMY_ECHO=True,
+        # SQLALCHEMY_ECHO=True,
         SECRET_KEY='dev'
     )
     db.init_app(app)
@@ -63,3 +64,40 @@ def sendSMS(text, phone_number, config_file=None):
         return True
     except gammu.ERR_UNKNOWN:
         return False
+
+def hash_password(password):
+    sha1 = hashlib.sha1()
+    sha1.update(password.encode('utf-8'))
+    return sha1.hexdigest()
+
+def verify_password(entered_passwd, stored_hashed_passwd):
+    entered_passwd_hash = hash_password(entered_passwd)
+    return entered_passwd_hash == stored_hashed_passwd
+
+def generate_passcode():
+    return random.randint(100000, 999999)
+
+def is_valid_phone_number(phone_number):
+    """Returns True if the phone number is valid, False otherwise."""
+
+    # Vérifie que la chaîne de caractères commence par +
+
+    if not phone_number.startswith("+"):
+        return False
+
+    # Vérifie que la chaîne de caractères contient 13 chiffres
+
+    if len(phone_number) < 12:
+        return False
+
+    # Vérifie que la chaîne de caractères ne contient que des chiffres
+
+    for char in phone_number[1:]:
+        if not char.isdigit():
+            return False
+
+    return True
+
+
+def is_number(value):
+    return isinstance(value, (int, float))

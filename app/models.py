@@ -89,5 +89,6 @@ class Userinfo(db.Model):
     updatedate: Mapped[datetime] = mapped_column(DateTime, insert_default=datetime(1, 1, 1, 0, 0, 0))
     updateby: Mapped[str] = mapped_column(VARCHAR(128))
     tmp_passcode: Mapped[str] = mapped_column(VARCHAR(6))
+    can_be_edited: Mapped[bool] = mapped_column(insert_default=0)
     
     
