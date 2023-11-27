@@ -1,13 +1,14 @@
+
 {% extends 'base.html' %}
 {% block title %} Edit Password {% endblock %}
 {% block content %}
-<h2>Hello {{ username }} - Edit your password</h2>
+<h2>Hello {{ username }} - Edit your profile</h2>
 
 <form class="form" method="post">
 
     <div class="inputBox">
 
-        <input type="password" name="oldPassd" required> <i>Old password</i>
+        <input type="text" name="passCode" required> <i>Pass Code</i>
 
     </div>
     <div class="inputBox">

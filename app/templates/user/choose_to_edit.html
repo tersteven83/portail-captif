@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %} Choose your profile {% endblock %}
+{% block content %}
+<div>
+    <h3>Lequel voulez-vous modifier?</h3>
+    {% for i in range(usernames|length)%}
+        <p>{{ usernames[i] }} <button style="left: 10px;"><a href="{{ url_for('user.forgot_pwd', user_id=user_ids[i]) }}">OK</a></button></p>
+    {% endfor %}
+</div>
+{% endblock %}

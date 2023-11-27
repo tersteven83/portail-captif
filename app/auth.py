@@ -1,10 +1,10 @@
 from flask import (Blueprint, flash, redirect, g,
                    url_for, render_template, request, jsonify,
                    session)
-
 from .models import *
 from . import sendSMS, db, is_valid_phone_number, generate_passcode
 from sqlalchemy import text
+from sqlalchemy.orm.exc import MultipleResultsFound
 import re
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -67,7 +67,7 @@ def number():
                 else:
                     print("Le forfait est épuisé")
         else:
-            print("Misy tsy mety")
+            flash("Vérifié votre saisi l'ami", category='error')
 
     return render_template('auth/number.html')
 
@@ -78,28 +78,44 @@ def gather_id():
         if is_valid_phone_number(value):
             # la valeur reçu du formulaire est un numéro de téléphone
             # vérifier sa présence dans la BD
-            # si oui on retourne son ID
-            user_info = Userinfo.query.filter(Userinfo.workphone == value).one_or_none()
-            
-            if user_info:
-                # générer un passcode et enregistrer dans la table userinfo
-                tmp_passcode = str(generate_passcode())
-                user_info.tmp_passcode = tmp_passcode
+            # si le numéro est present dans plus de 1 ligne, on affiche d'abord une page avec un bouton ok
+            # si non on retourne son ID tout de suite dans user.edit_pwd
+            try:
+                user_info = Userinfo.query.filter(Userinfo.workphone == value).scalar()
+                if user_info:
+                    # générer un passcode et enregistrer dans la table userinfo
+                    tmp_passcode = str(generate_passcode())
+                    user_info.tmp_passcode = tmp_passcode
 
-                # Envoyer le passcode à l'utilisateur
-                msg = f"Votre pass code de réinitialisation de mot de passe : {tmp_passcode}"
-                # if sendSMS(msg, value):
-                if 1:
-                    print('ok')
-                    
-                    # make the user_info editable
-                    user_info.can_be_edited = True
-                    db.session.commit()
-                    return redirect(url_for('user.edit_pwd', user_id=user_info.id))
+                    # Envoyer le passcode à l'utilisateur
+                    msg = f"Votre pass code de réinitialisation de mot de passe : {tmp_passcode}"
+                    # if sendSMS(msg, value):
+                    if 1:
+                        print('ok')
+                        
+                        # make the user_info editable
+                        user_info.can_be_edited = True
+                        db.session.commit()
+                        return redirect(url_for('user.forgot_pwd', user_id=user_info.id))
+                    else:
+                        print("le code n'est pas envoyé")
                 else:
-                    print("le code n'est pas envoyé")
-            else:
-                flash("L'utilisatuer que vous cherchez n'existe pas", category='error')
+                    flash("L'utilisatuer que vous cherchez n'existe pas", category='error')
+            except MultipleResultsFound:
+                user_infos = Userinfo.query.filter(Userinfo.workphone == value).all()
+                # recupérer tous les id et les usernames
+                # make all user_info editable
+                user_ids = []
+                usernames = []
+                for user_info in user_infos:
+                    user_ids.append(user_info.id)
+                    usernames.append(user_info.username)
+                    user_info.can_be_edited = True
+                db.session.commit()
+                
+                return render_template('user/choose_to_edit.html', user_ids=user_ids, usernames=usernames)
+                    
+                
         
         elif bool(re.match("^(?=.*[a-zA-Z])[a-zA-Z0-9_]+$", value)):
             # de la forme username
@@ -125,12 +141,13 @@ def gather_id():
                     if 1:
                         print(msg + " work-phone: " + user_info.workphone)
                         db.session.commit()
-                        return redirect(url_for('user.edit_pwd', user_id=user_info.id))
+                        return redirect(url_for('user.forgot_pwd', user_id=user_info.id))
                     else:
                         print("le code n'est pas envoyé")
                 else:
                     # l'utilisateur n'a pas de numéro téléphone
                     flash("Vous n'avez pas encore de numéro de téléphone de travail, veuillez me renseignez")
+                    db.session.commit()
                     return redirect(url_for('user.add_work_phone', ID=user_info.id, is_session=0))
                 
             else:

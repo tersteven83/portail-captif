@@ -47,11 +47,7 @@
         <span></span> <span></span> <span></span> <span></span> <span></span>
 
         <div class="signin">
-            {% for message in get_flashed_messages() %}
-            <div class="flash">{{ message }}</div>
-            {% endfor %}
-
-            <div class="content">
+           <div class="content">
 
                 {% block content %} {% endblock %}
 
@@ -60,6 +56,13 @@
         </div>
 
     </section> <!-- partial -->
+
+    {% for message in get_flashed_messages() %}
+    <script>
+        message = "{{ message|safe }}";
+        alert(message);
+    </script>
+    {% endfor %}
 
 </body>
 
