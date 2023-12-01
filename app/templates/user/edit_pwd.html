@@ -1,24 +1,24 @@
 {% extends 'base.html' %}
-{% block title %} Edit Password {% endblock %}
+{% block title %} Modification de mot de passe {% endblock %}
 {% block content %}
-<h2>Hello {{ username }} - Edit your password</h2>
+<h2>Salut {{ username }} - Modifiez votre mot de passe</h2>
 
 <form class="form" method="post">
 
     <div class="inputBox">
 
-        <input type="password" name="oldPassd" required> <i>Old password</i>
+        <input type="password" name="oldPassd" required> <i>Ancien Mot de Passe</i>
 
     </div>
     <div class="inputBox">
 
-        <input type="password" name="newPassd" required> <i>New password</i>
+        <input type="password" name="newPassd" required> <i>Nouveau Mot de Passe</i>
 
     </div>
 
     <div class="inputBox">
 
-        <input type="password" name="cnfPassd" required> <i>Confirm password</i>
+        <input type="password" name="cnfPassd" required> <i>Confirmez le Mot de Passe</i>
 
     </div>
 

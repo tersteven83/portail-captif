@@ -81,6 +81,7 @@ def edit_pwd(acctsessionId):
             ).one()
             password_attr = user_check_passd.attribute[:-9].lower()
             password_value = user_check_passd.value
+            print(bool(re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$", new_passd)))
             if password_is_correct(old_passd, password_value, password_attr) and \
                 new_passd == cnf_passd and\
                 bool(re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$", new_passd)):
@@ -94,6 +95,7 @@ def edit_pwd(acctsessionId):
                 
                 
             else:
+                print(old_passd + " " + new_passd + " " + cnf_passd)
                 flash("Les mots de passes que vous avez saisi ne sont pas correctes.")
         return render_template('user/edit_pwd.html', username=username)
         
