@@ -1,6 +1,7 @@
 # Portail-Captif
  
- Ceci est une application conçu pour un portail captif 
+ Ceci est une application conçu pour un portail captif
+ 
  Les fonctionnalités disponibles sur cette application sont:
 - Requête de numéro de téléphone et envoi un voucher code par sms
 - Vérification d'un utilisateur s'il fait partie de l'organisation
