@@ -36,8 +36,72 @@ gammu version
 
 ## Configurer Gammu
 1. Brancher le modem
+
 2. Vérifier s'il est bien installé
 ```
 lsusb
 ```
 ![lsusb capture](images/lsusb.png)
+
+3. Créer un fichier *.gammurc* dans le repértoire _Home_
+```
+cat << EOF > ~/.gammurc
+[gammu]
+
+port = /dev/ttyUSB1
+model = 
+connection = at
+synchronizetime = yes
+logfile = 
+logformat = nothing
+use_locking = 
+gammuloc =
+EOF
+```
+
+4. Tester gammu manuellement
+```
+sudo gammu -f ~/.gammurc --identify
+```
+
+5. Pour executer le commande <gammu> sans avoir le privilège root à chaque fois, ajouter l'utilisateur dans le group <dialout>
+```
+sudo usermod -aG dialout $user
+```
+
+6. Tester la commande du N*4 sans sudo
+```
+gammu identify
+```
+
+7. Ajouter <GAMMU_PATH> dans l'environnement, _~/.bashrc_ ou bien _~/.zshrc_
+```
+nano ~/.bashrc
+```
+```
+export GAMMU_PATH="/usr/local"
+```
+Enregistrer et quitter `ctrl+x` `y`
+
+8. Rafraîchir le dernier changement dans le fichier de l'environnement
+```
+source ~/.bashrc
+```
+
+9. Installer <pkg-config>
+```
+sudo apt install pkg-config
+```
+
+## Installation de l'application
+1. Installer <pip>
+```
+sudo apt install python-pip git
+```
+2. Installer les packages requises
+```
+cd ~
+git clone https://github.com/tersteven83/portail-captif.git
+cd portail-captif
+pip install -r requirements.txt
+```
