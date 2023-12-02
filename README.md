@@ -34,4 +34,10 @@ sudo make install
 gammu version
 ```
 
-II - Configurer Gammu
+## Configurer Gammu
+1. Brancher le modem
+2. Vérifier s'il est bien installé
+```
+lsusb
+```
+![lsusb capture](images/lsusb.png)
