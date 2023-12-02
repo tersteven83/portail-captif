@@ -7,18 +7,18 @@ Les fonctionnalités disponibles sur cette application sont:
 - Modification de mot de passe
 
 # Installation dans Ubuntu/Debian
-I - Installer Gammu depuis la code source
-1- Télécharger gammu depuis le site officiel https://wammu.eu/download/gammu/
+## Installer Gammu depuis la code source
+1. Télécharger gammu depuis le site officiel https://wammu.eu/download/gammu/
 ```
 wget https://dl.cihar.com/gammu/releases/gammu-1.42.0.tar.gz
 ```
  
-2- Décompresser l'archive
+2. Décompresser l'archive
 ```
 tar xvf gammu-1.42.0.tar.gz
 ```
 
-3- Configurer et installer 
+3. Configurer et installer 
 ```
 sudo apt update && sudo apt upgrade -y
 sudo apt install build-essential cmake
@@ -27,7 +27,7 @@ cd gammu-1.42.0
 sudo make install
 ```
 
-4- Vérifier si le package est bien installé
+4. Vérifier si le package est bien installé
 ```
 gammu version
 ```
