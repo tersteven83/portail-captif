@@ -6,7 +6,7 @@
 
     <title>{% block title %} {% endblock %}</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='auth/number.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 </head>
 
@@ -63,6 +63,8 @@
         alert(message);
     </script>
     {% endfor %}
+    <script src="{{ url_for('static', filename='jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='index.js') }}"></script>
 
 </body>
 

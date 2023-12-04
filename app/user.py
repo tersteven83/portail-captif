@@ -2,7 +2,7 @@ from flask import (Blueprint, render_template, request, flash, redirect,
                    url_for)
 from sqlalchemy import and_
 from .models import Radacct, Radcheck, Userinfo
-from . import db, generate_passcode, hash_password, verify_password
+from . import db, generate_passcode, hash_password, verify_password, sendSMS
 from .auth import is_valid_phone_number
 import re
 
@@ -10,6 +10,11 @@ import re
 bp = Blueprint("user", __name__, url_prefix='/user')
 @bp.route('/add_wk/<ID>/<int:is_session>', methods=["POST", "GET"])
 def add_work_phone(ID, is_session):
+    """
+    ajouter un numéro de téléphone
+    :param ID: id de l'utilisateur ou id de la session
+    :param is_session: 0|1 1 si c'est lors d'une session active que l'utilisateur veut ajouter son tel
+    """
     if is_session == 1:
         session_is_active, sessionInfo = session_state(ID)
         if session_is_active:
@@ -43,9 +48,9 @@ def add_work_phone(ID, is_session):
 
                     # Envoyer le passcode à l'utilisateur
                     msg = f"Votre pass code de réinitialisation de mot de passe : {tmp_passcode}"
-                    # if sendSMS(msg, wk_phone):
-                    if 1:
-                        print(msg)
+                    if sendSMS(msg, tel):
+                    # if 1:
+                        # print(msg)
                         # user_info.can_be_edited = False
                         db.session.commit()
                         return redirect(url_for('user.forgot_pwd', user_id=ID))
@@ -56,7 +61,7 @@ def add_work_phone(ID, is_session):
             
             return render_template('user/add_work_phone.html', user_info=user_info)
         else:
-            return  user_info.__str__()
+            return  '404 error not found', 404
     
 
 @bp.route('/edit_pwd/<acctsessionId>', methods=['GET', 'POST'])
@@ -81,10 +86,8 @@ def edit_pwd(acctsessionId):
             ).one()
             password_attr = user_check_passd.attribute[:-9].lower()
             password_value = user_check_passd.value
-            print(bool(re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$", new_passd)))
-            if password_is_correct(old_passd, password_value, password_attr) and \
-                new_passd == cnf_passd and\
-                bool(re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$", new_passd)):
+            if password_is_correct(old_passd, password_value, password_attr) and new_passd == cnf_passd:
+                # bool(re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$", new_passd)):
                 # hasher le nouveau password
                 hash_pwd = hash_password(new_passd)
                 user_check_passd.value = hash_pwd
@@ -95,7 +98,7 @@ def edit_pwd(acctsessionId):
                 
                 
             else:
-                print(old_passd + " " + new_passd + " " + cnf_passd)
+                # print(old_passd + " " + new_passd + " " + cnf_passd)
                 flash("Les mots de passes que vous avez saisi ne sont pas correctes.")
         return render_template('user/edit_pwd.html', username=username)
         
@@ -117,8 +120,8 @@ def forgot_pwd(user_id):
             # vérifier si le passcode entré par l'utilisateur est le même que celle dans la BD,
             # les deux passwords sont égaux,
             # les password sont conformes aux normes
-            if user_info.tmp_passcode == pass_code and new_passd == cnf_passd and \
-                bool(re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$", new_passd)):
+            if user_info.tmp_passcode == pass_code and new_passd == cnf_passd:
+                # bool(re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$", new_passd)):
                 
                 # hasher le nouveau password
                 hash_pwd = hash_password(new_passd)

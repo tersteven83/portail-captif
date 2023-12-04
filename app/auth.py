@@ -11,6 +11,9 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @bp.route('/number', methods=('GET', 'POST'))
 def number():
+    """
+    Demander le numéro téléphone de l'invité et lui envoyé un Voucher Code par SMS
+    """
     # Les vouchers disponibles
     voucher_dispo = Voucher.query.\
         filter(
@@ -73,6 +76,10 @@ def number():
 
 @bp.route('/gather_id', methods=['GET', 'POST'])
 def gather_id():
+    """
+    En cas d'oublie de mot de passe, l'utilisateur sera prié d'entrer son Identifiant(username)
+    ou bien son numéro de téléphone afin de l'identifier dans la base de donnée.
+    """
     if request.method == "POST":
         value = request.form.get("value")
         if is_valid_phone_number(value):
@@ -89,8 +96,8 @@ def gather_id():
 
                     # Envoyer le passcode à l'utilisateur
                     msg = f"Votre pass code de réinitialisation de mot de passe : {tmp_passcode}"
-                    # if sendSMS(msg, value):
-                    if 1:
+                    if sendSMS(msg, value):
+                    # if 1:
                         print('ok')
                         
                         # make the user_info editable
@@ -107,14 +114,21 @@ def gather_id():
                 # make all user_info editable
                 user_ids = []
                 usernames = []
+                tmp_passcode = str(generate_passcode())
                 for user_info in user_infos:
                     user_ids.append(user_info.id)
                     usernames.append(user_info.username)
                     user_info.can_be_edited = True
-                db.session.commit()
+                    user_info.tmp_passcode = tmp_passcode
                 
-                return render_template('user/choose_to_edit.html', user_ids=user_ids, usernames=usernames)
-                    
+                # Envoyer le passcode à l'utilisateur
+                msg = f"Votre pass code de réinitialisation de mot de passe : {tmp_passcode}"
+                if sendSMS(msg, value):
+                # if 1:
+                    db.session.commit()
+                    return render_template('user/choose_to_edit.html', user_ids=user_ids, usernames=usernames)
+                else:
+                    print("le code n'est pas envoyé")
                 
         
         elif bool(re.match("^(?=.*[a-zA-Z])[a-zA-Z0-9_]+$", value)):
@@ -137,8 +151,8 @@ def gather_id():
 
                     # Envoyer le passcode à l'utilisateur
                     msg = f"Votre pass code de réinitialisation de mot de passe : {tmp_passcode}"
-                    # if sendSMS(msg, wk_phone):
-                    if 1:
+                    if sendSMS(msg, wk_phone):
+                    # if 1:
                         print(msg + " work-phone: " + user_info.workphone)
                         db.session.commit()
                         return redirect(url_for('user.forgot_pwd', user_id=user_info.id))
@@ -151,7 +165,7 @@ def gather_id():
                     return redirect(url_for('user.add_work_phone', ID=user_info.id, is_session=0))
                 
             else:
-                flash("L'utilisatuer que vous cherchez n'existe pas", category='error')
+                flash("L'utilisateur que vous cherchez n'existe pas", category='error')
         else:
             flash("Veuillez vérifier votre saisi", category='error')
             
