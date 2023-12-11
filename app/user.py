@@ -142,8 +142,7 @@ def forgot_pwd(user_id):
                 db.session.commit()
                 return redirect("http://192.168.110.0:8002/index.php?zone=ambohijatovo")
             else:
-                flash("Le code que vous avez entré est invalide. Veuillez vérifier votre saisi et/ou consulter votre \
-                    telephone", category='error')
+                flash("Le code que vous avez entré est invalide. Veuillez vérifier votre saisi et/ou consulter votre telephone", category='error')
             
         return render_template('user/fg_pwd.html', username=user_info.username)       
     else:
