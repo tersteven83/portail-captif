@@ -27,6 +27,8 @@ class Voucher(db.Model):
     is_active: Mapped[bool] = mapped_column(default=0)
     telephone_number: Mapped[Optional[str]] = mapped_column(VARCHAR(255))
     date: Mapped[datetime] = mapped_column(DateTime)
+    mac_address: Mapped[str] = mapped_column(VARCHAR(255))
+    printed: Mapped[bool] = mapped_column(default=0)
     
 
 @generic_repr
@@ -91,4 +93,11 @@ class Userinfo(db.Model):
     tmp_passcode: Mapped[str] = mapped_column(VARCHAR(6))
     can_be_edited: Mapped[bool] = mapped_column(insert_default=0)
     
+class Number_auth(db.Model):
+    __tablename__ = "number_auth"
+    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    code: Mapped[str] = mapped_column(VARCHAR(255), unique=True, index=True)
+    expiration: Mapped[datetime] = mapped_column(DateTime)
+    already_ask_voucher: Mapped[bool] = mapped_column(insert_default=0)
     

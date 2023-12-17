@@ -108,11 +108,11 @@ body {
             <div class="login-space"  >
                 <div class="login">
                     <div class="group" style="padding-left: 15px;">
-                        <label for="auth_user" class="label" style= "padding-left: 15px;">Username</label>
+                        <label for="auth_user" class="label" style= "padding-left: 15px;">Identifiant</label>
                         <input id="user" name="auth_user" type="text" class="input"  placeholder="Enter your username" style="width: 80%;">
                     </div>
                     <div class="group" style="padding-left: 15px;">
-                        <label for="auth_pass" class="label" style="padding-left: 15px;">Password</label >
+                        <label for="auth_pass" class="label" style="padding-left: 15px;">Mot de passe</label >
                         <input id="pass" name="auth_pass" type="password" class="input" data-type="password" placeholder="Enter your password" style="width: 80%" >
                         <input type="hidden" value="$PORTAL_ZONE$">
                     </div>

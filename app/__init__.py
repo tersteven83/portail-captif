@@ -4,7 +4,6 @@ from sqlalchemy.orm import DeclarativeBase
 import gammu
 import hashlib, random
 
-
 class Base(DeclarativeBase):
     pass
 
@@ -15,8 +14,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_mapping(
         # SQLALCHEMY_DATABASE_URI='mysql+pymysql://user:user@localhost/portail-captif',
-        SQLALCHEMY_DATABASE_URI='mysql+pymysql://raduser:radpass@192.168.11.250/raddb',
-        # SQLALCHEMY_ECHO=True,
+        SQLALCHEMY_DATABASE_URI='mysql+pymysql://raduser:radpass@192.168.11.251/raddb',
+        SQLALCHEMY_ECHO=True,
         SECRET_KEY='dev'
     )
     db.init_app(app)

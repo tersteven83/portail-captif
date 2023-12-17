@@ -6,7 +6,7 @@ class Db extends PDO
     private static $instance;
 
     // information de connexion
-    private const DBHOST = '192.168.11.250';
+    private const DBHOST = '192.168.11.251';
     private const DBUSER = 'raduser';
     private const DBPASS = 'radpass';
     private const DBNAME = 'raddb';
