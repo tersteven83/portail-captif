@@ -1,4 +1,4 @@
-<!--<?php
+<?php
     require "captiveportal-model.php";
     $radacct = new Radacct;
     $radgroupcheck = new Radgroupcheck;
@@ -7,8 +7,10 @@
 
     // trouver l'utilisateur portant le numéro se session
     $session = $radacct->findBy(['acctsessionid' => $sessionid]);
+    while($session == null){
+        $session = $radacct->findBy(['acctsessionid' => $sessionid]);
+    }
     $username = $session->username;
-
     // recupérer le profil de l'utilisateur
 
     $profils = $radusergroup->findBy(['username' => $username]);
@@ -63,7 +65,6 @@
     // echo $sessionid;
 
     ?>
--->
 
 
 
@@ -129,7 +130,7 @@
                                         <tr>
                                             <td><span style="font-weight: bold; ">Identifiant</span>
                                                 <br><?= $username; ?>
-                                                <?php if (isset($username) && (strpos($username, "omnis_") !== true)): ?>
+                                                <?php if (isset($username) && (strpos($username, "omnis_") !== 0)): ?>
                                                     <a href="http://192.168.11.150:8080/user/edit_pwd/<?= $sessionid ?>">
                                                         <img width="25" height="25" class="edit" src="https://img.icons8.com/cotton/64/create-new--v5.png" alt="create-new--v5" style="position: relative;; height: 25px;float: right ;display: inline;border-radius: 3px;" />
                                                     </a>
@@ -170,9 +171,9 @@
             </div>
         </section>
     </div>
-    <script>
-        window.open("<?= $my_redirurl; ?>", "_blank");
-    </script>
+<script>
+    window.open("<?= $my_redirurl; ?>", "_blank");
+</script>
 </body>
 
 </html>

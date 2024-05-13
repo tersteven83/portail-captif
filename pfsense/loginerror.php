@@ -80,7 +80,7 @@
     }
     #error{
       color: red;
-      transition: all ease 300ms;
+      transition: all ease 1000ms;
     }
   </style>
 </head>

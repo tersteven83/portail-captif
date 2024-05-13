@@ -56,8 +56,8 @@ def number(confirm_code):
                             username: {voucher_code.voucher_code} \
                             password: -"
                     
-                    # if sendSMS(msg, telephone_number):
-                    if 1:
+                    if sendSMS(msg, telephone_number):
+                    # if 1:
                         print("OK!!")
                         # Message envoyé avec succès
                         success = "Le code est envoyé avec succès, vérifiez votre téléphone"
@@ -105,8 +105,8 @@ def gather_id():
 
                     # Envoyer le passcode à l'utilisateur
                     msg = f"Votre pass code de réinitialisation de mot de passe : {tmp_passcode}"
-                    # if sendSMS(msg, value):
-                    if 1:
+                    if sendSMS(msg, value):
+                    # if 1:
                         print('ok')
                         
                         # make the user_info editable
@@ -132,8 +132,8 @@ def gather_id():
                 
                 # Envoyer le passcode à l'utilisateur
                 msg = f"Votre pass code de réinitialisation de mot de passe : {tmp_passcode}"
-                # if sendSMS(msg, value):
-                if 1:
+                if sendSMS(msg, value):
+                # if 1:
                     db.session.commit()
                     return render_template('user/choose_to_edit.html', user_ids=user_ids, usernames=usernames)
                 else:
@@ -160,8 +160,8 @@ def gather_id():
 
                     # Envoyer le passcode à l'utilisateur
                     msg = f"Votre pass code de réinitialisation de mot de passe : {tmp_passcode}"
-                    # if sendSMS(msg, wk_phone):
-                    if 1:
+                    if sendSMS(msg, wk_phone):
+                    # if 1:
                         print(msg + " work-phone: " + user_info.workphone)
                         db.session.commit()
                         return redirect(url_for('user.forgot_pwd', user_id=user_info.id))

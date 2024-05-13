@@ -48,8 +48,8 @@ def add_work_phone(ID, is_session):
 
                     # Envoyer le passcode à l'utilisateur
                     msg = f"Votre pass code de réinitialisation de mot de passe : {tmp_passcode}"
-                    # if sendSMS(msg, tel):
-                    if 1:
+                    if sendSMS(msg, tel):
+                    # if 1:
                         print(msg)
                         # user_info.can_be_edited = False
                         db.session.commit()
