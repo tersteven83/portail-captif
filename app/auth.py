@@ -4,6 +4,7 @@ from .models import *
 from . import sendSMS, db, is_valid_phone_number, generate_passcode
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 import re
+from . import config
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -24,7 +25,7 @@ def number(confirm_code):
                 Voucher.printed == False
             )
         # compter le nombre de voucher code dispo, si c'est inférieur ou égal à 100, on alerte l'admin
-        num_admin = "+261333476904"
+        num_admin = config.num_admin
         nb_voucher = voucher_dispo.count()
         if nb_voucher in range(0, 100, 10):
             sendSMS(f"Bonjour admin, vous devriez ajouter de nouvels code voucher, il n'y en reste plus que {nb_voucher}",

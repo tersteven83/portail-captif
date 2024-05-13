@@ -4,4 +4,7 @@ database = {
     "password": "radpass",
     "database": "raddb"
 }
+num_admin = "+261333476904"
+ip_pfsense = "192.168.110.1"
+zone = "ambohijatovo"  # zone du portail captif
 

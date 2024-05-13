@@ -5,6 +5,7 @@ from .models import Radacct, Radcheck, Userinfo
 from . import db, generate_passcode, hash_password, verify_password, sendSMS
 from .auth import is_valid_phone_number
 import re
+from . import config
 
 
 bp = Blueprint("user", __name__, url_prefix='/user')
@@ -94,7 +95,7 @@ def edit_pwd(acctsessionId):
                 user_check_passd.attribute = "SHA-Password"
                 db.session.commit()
                 # flash("Votre nouveau mot de passe a bien été enregistré", category='message')
-                return redirect("http://192.168.110.1:8002/index.php?zone=ambohijatovo")
+                return redirect(f"http://{config.ip_pfsense}:8002/index.php?zone={config.zone}")
                 
                 
             else:
@@ -140,7 +141,7 @@ def forgot_pwd(user_id):
                     Userinfo.can_be_edited: False
                 })
                 db.session.commit()
-                return redirect("http://192.168.110.0:8002/index.php?zone=ambohijatovo")
+                return redirect(f"http://{config.ip_pfsense}:8002/index.php?zone={config.zone}")
             else:
                 flash("Le code que vous avez entré est invalide. Veuillez vérifier votre saisi et/ou consulter votre telephone", category='error')
             

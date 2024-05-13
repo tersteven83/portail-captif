@@ -27,6 +27,7 @@ sudo apt install build-essential cmake
 cd gammu-1.42.0
 ./configure; make
 sudo make install
+sudo ldconfig
 ```
 
 4. Vérifier si le package est bien installé
@@ -59,15 +60,13 @@ gammuloc =
 EOF
 ```
 
-4. Tester gammu manuellement
-```
-sudo gammu -f ~/.gammurc --identify
-```
 
-5. Pour executer le commande <gammu> sans avoir le privilège root à chaque fois, ajouter l'utilisateur dans le group <dialout>
+4. Pour executer le commande <gammu> sans avoir le privilège root à chaque fois, ajouter l'utilisateur dans le group <dialout>
 ```
 sudo usermod -aG dialout $user
 ```
+
+5. Redémarrer le serveur.
 
 6. Tester la commande du N*4 sans sudo
 ```
