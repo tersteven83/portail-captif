@@ -5,6 +5,7 @@ from sqlalchemy.exc import OperationalError
 import gammu
 import hashlib, random
 from .config import database
+import re
 
 class Base(DeclarativeBase):
     pass
@@ -85,10 +86,8 @@ def generate_passcode():
 def is_valid_phone_number(phone_number):
     """Returns True if the phone number is valid, False otherwise."""
 
-    # Vérifie que la chaîne de caractères commence par +
-
-    if not phone_number.startswith("+"):
-        return False
+    # formater le numéro téléphone
+    phone_number = format_tel_number(phone_number)
 
     # Vérifie que la chaîne de caractères contient 13 chiffres
 
@@ -103,6 +102,14 @@ def is_valid_phone_number(phone_number):
 
     return True
 
+def format_tel_number(phone_number):
+    """Returns the phone number in international format"""
+    # vérifie si le numero telephone commence par "033", "032", "038"....
+    pattern = "^(020|032|033|034|037|038)"
+    
+    if not phone_number.startswith("+") and re.match(pattern, phone_number):
+        phone_number = "+261" + phone_number[1:]
+    return phone_number
 
 def is_number(value):
     return isinstance(value, (int, float))

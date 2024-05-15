@@ -1,7 +1,7 @@
 from flask import (Blueprint, flash, redirect,
                    url_for, render_template, request)
 from .models import *
-from . import sendSMS, db, is_valid_phone_number, generate_passcode
+from . import sendSMS, db, is_valid_phone_number, generate_passcode, format_tel_number
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 import re
 from . import config
@@ -36,6 +36,7 @@ def number(confirm_code):
 
             # vérifier si le numero de telephone est valide
             if is_valid_phone_number(telephone_number):
+                telephone_number = format_tel_number(telephone_number)
                 # fetch the first non active voucher code
                 voucher_code = voucher_dispo.first()
                 print(voucher_code)
@@ -93,12 +94,13 @@ def gather_id():
     if request.method == "POST":
         value = request.form.get("value")
         if is_valid_phone_number(value):
+            tel = format_tel_number(value)
             # la valeur reçu du formulaire est un numéro de téléphone
             # vérifier sa présence dans la BD
             # si le numéro est present dans plus de 1 ligne, on affiche d'abord une page avec un bouton ok
             # si non on retourne son ID tout de suite dans user.edit_pwd
             try:
-                user_info = Userinfo.query.filter(Userinfo.workphone == value).scalar()
+                user_info = Userinfo.query.filter(Userinfo.workphone == tel).scalar()
                 if user_info:
                     # générer un passcode et enregistrer dans la table userinfo
                     tmp_passcode = str(generate_passcode())
@@ -106,7 +108,7 @@ def gather_id():
 
                     # Envoyer le passcode à l'utilisateur
                     msg = f"Votre pass code de réinitialisation de mot de passe : {tmp_passcode}"
-                    if sendSMS(msg, value):
+                    if sendSMS(msg, tel):
                     # if 1:
                         print('ok')
                         
@@ -117,7 +119,7 @@ def gather_id():
                     else:
                         print("le code n'est pas envoyé")
                 else:
-                    flash("L'utilisatuer que vous cherchez n'existe pas", category='error')
+                    flash("L'utilisateur que vous cherchez n'existe pas", category='error')
             except MultipleResultsFound:
                 user_infos = Userinfo.query.filter(Userinfo.workphone == value).all()
                 # recupérer tous les id et les usernames
@@ -133,7 +135,7 @@ def gather_id():
                 
                 # Envoyer le passcode à l'utilisateur
                 msg = f"Votre pass code de réinitialisation de mot de passe : {tmp_passcode}"
-                if sendSMS(msg, value):
+                if sendSMS(msg, tel):
                 # if 1:
                     db.session.commit()
                     return render_template('user/choose_to_edit.html', user_ids=user_ids, usernames=usernames)

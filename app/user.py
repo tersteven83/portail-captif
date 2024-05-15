@@ -2,7 +2,7 @@ from flask import (Blueprint, render_template, request, flash, redirect,
                    url_for)
 from sqlalchemy import and_
 from .models import Radacct, Radcheck, Userinfo
-from . import db, generate_passcode, hash_password, verify_password, sendSMS
+from . import db, generate_passcode, hash_password, verify_password, sendSMS, format_tel_number
 from .auth import is_valid_phone_number
 import re
 from . import config
@@ -24,6 +24,7 @@ def add_work_phone(ID, is_session):
             if request.method == "POST":
                 tel = request.form.get("tel")
                 if is_valid_phone_number(tel):
+                    tel = format_tel_number(tel)
                     user_info = Userinfo.query.filter(Userinfo.username == username).one_or_none()
                     user_info.workphone = tel
                     db.session.commit()
@@ -40,6 +41,7 @@ def add_work_phone(ID, is_session):
             if request.method == "POST":
                 tel = request.form.get("tel")
                 if is_valid_phone_number(tel):
+                    tel = format_tel_number(tel)
                     user_info.workphone = tel
                     flash("Votre numéro a été bien enregistré", category='message')
                     
