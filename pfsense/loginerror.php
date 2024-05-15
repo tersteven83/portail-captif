@@ -1,3 +1,6 @@
+<?php
+  require_once('captiveportal-config.php');
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -126,7 +129,7 @@
                     </div>-->
                   <div class="group" style="margin-top: 10%; padding-left: 15px; margin-right: auto;">
                     <input type="submit" class="button" value="login" name="accept" style="max-width: 80%;  max-height: 30px; font-size: 10px; padding-top:6px; padding-left: 15px; ">
-                    <a href="http://192.168.11.150:8080/auth/gather_id" style="font-weight: normal; margin-left: 22%;">mot de passe oublié?</a>
+                    <a href="http://<?= SRV_APP ?>/auth/gather_id" style="font-weight: normal; margin-left: 22%;">mot de passe oublié?</a>
                   </div>
 
                   <div class="sign-up-form" style="padding-left: 20px;">

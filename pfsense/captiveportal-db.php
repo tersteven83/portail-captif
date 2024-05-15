@@ -1,24 +1,19 @@
 <?php
+require_once('captiveportal-config.php');
 use PDOException;
 
 class Db extends PDO
 {
     private static $instance;
 
-    // information de connexion
-    private const DBHOST = '192.168.11.251';
-    private const DBUSER = 'raduser';
-    private const DBPASS = 'radpass';
-    private const DBNAME = 'raddb';
-
     private function __construct()
     {
         // connect au DSN
-        $_dsn = 'mysql:dbname=' . self::DBNAME . ';host=' . self::DBHOST;
+        $_dsn = 'mysql:dbname=' . DB_DATABASE . ';host=' . DB_HOST;
 
         // on appelle le constructeur PDO
         try {
-            parent::__construct($_dsn, self::DBUSER, self::DBPASS);
+            parent::__construct($_dsn, DB_USERNAME, DB_PASSWORD);
             $this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->setAttribute(PDO::MYSQL_ATTR_INIT_COMMAND, 'set name utf8');
             $this->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
